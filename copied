@@ -1,0 +1,13 @@
+templ (cw *ChartWidget) Component() {
+	<div class="bg-card text-card-foreground rounded-xl flex flex-col border shadow-sm p-4 h-60">
+		<h3 class="text-lg font-bold mb-2">Test TitleStr</h3>
+		<div class="w-full h-40">
+			<canvas id="chart" class="w-full h-full"></canvas>
+		</div>
+	</div>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.3.2"></script>
+	<script src="https://cdn.jsdelivr.net/npm/luxon@1.27.0"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
+	<script src="/static/assets/js/chart.js"></script>
+}
