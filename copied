@@ -11,3 +11,49 @@ templ (cw *ChartWidget) Component() {
 	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
 	<script src="/static/assets/js/chart.js"></script>
 }
+
+
+mux.HandleFunc(
+		"/events", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
+			w.Header().Set("Cache-Control", "no-cache, no-transform")
+			w.Header().Set("Connection", "keep-alive")
+			// Optional but helpful behind certain proxies/reverse proxies:
+			w.Header().Set("X-Accel-Buffering", "no")
+			// Set CORS only if you actually need cross-origin:
+			// w.Header().Set("Access-Control-Allow-Origin", "*")
+
+			flusher, ok := w.(http.Flusher)
+			if !ok {
+				http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+				return
+			}
+
+			// Let the browser know how long to wait before reconnect attempts.
+			// This line defines the retry interval for future automatic reconnects.
+			fmt.Fprint(w, "retry: 5000\n\n")
+			flusher.Flush()
+
+			// Initial connection event
+			fmt.Fprint(w, "data: {\"type\": \"connected\"}\n\n")
+			flusher.Flush()
+
+			ticker := time.NewTicker(1000 * time.Millisecond)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					value := rand.Intn(200)
+					date := time.Now().UTC().Format(time.RFC3339Nano)
+
+					// Each SSE event ends with an extra newline
+					fmt.Fprintf(w, "data: {\"date\": \"%s\", \"value\": %d}\n\n", date, value)
+					flusher.Flush()
+
+				case <-r.Context().Done():
+					return
+				}
+			}
+		},
+	)
